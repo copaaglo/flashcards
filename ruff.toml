@@ -1,0 +1,14 @@
+# One ruff config for every Python app in the monorepo
+line-length = 100
+target-version = "py312"
+# Where our own code lives, so import sorting knows "main", "worker" and "tests" are ours
+src = ["apps/api", "apps/worker"]
+
+[lint]
+# E/W: pycodestyle, F: pyflakes (unused imports, undefined names), I: import sorting,
+# B: bugbear (likely bugs), UP: pyupgrade (modern syntax)
+select = ["E", "W", "F", "I", "B", "UP"]
+
+[lint.per-file-ignores]
+# conftest.py must set env vars before importing the app, so imports can't all be at the top
+"**/tests/conftest.py" = ["E402"]

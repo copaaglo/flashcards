@@ -27,13 +27,14 @@ def generate_study_set(text: str) -> StudySet:
         first_line = text.strip().splitlines()[0][:100]
         return StudySet(
             summary=f"(fake) This lecture starts with: {first_line}",
-            cards=[Card(
-                question=f"(fake) Question {i}?", answer=f"(fake) Answer {i}") for i in range(1, 4)],
+            cards=[
+                Card(question=f"(fake) Question {i}?", answer=f"(fake) Answer {i}")
+                for i in range(1, 4)
+            ],
         )
 
     if len(text) > MAX_CHARS:
-        raise ValueError(
-            f"Lecture is too long ({len(text)} chars, max {MAX_CHARS})")
+        raise ValueError(f"Lecture is too long ({len(text)} chars, max {MAX_CHARS})")
 
     client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY from the environment
     response = client.messages.parse(

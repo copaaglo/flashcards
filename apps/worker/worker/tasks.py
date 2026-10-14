@@ -29,8 +29,7 @@ def extract_text(pdf_bytes: bytes) -> str:
 
 def process_job(job_id: str):
     with psycopg.connect(DATABASE_URL) as conn:
-        row = conn.execute(
-            "SELECT s3_key FROM jobs WHERE id = %s", (job_id,)).fetchone()
+        row = conn.execute("SELECT s3_key FROM jobs WHERE id = %s", (job_id,)).fetchone()
         if row is None:
             raise ValueError(f"Job {job_id} not found")
         set_status(conn, job_id, "processing")
@@ -39,13 +38,11 @@ def process_job(job_id: str):
             obj = s3.get_object(Bucket=S3_BUCKET, Key=row[0])
             text = extract_text(obj["Body"].read())
             if not text.strip():
-                raise ValueError(
-                    "No text found in PDF (is it a scanned image?)")
+                raise ValueError("No text found in PDF (is it a scanned image?)")
 
             study_set = generate_study_set(text)
 
-            conn.execute("UPDATE jobs SET summary = %s WHERE id = %s",
-                         (study_set.summary, job_id))
+            conn.execute("UPDATE jobs SET summary = %s WHERE id = %s", (study_set.summary, job_id))
             for card in study_set.cards:
                 conn.execute(
                     "INSERT INTO cards (job_id, question, answer) VALUES (%s, %s, %s)",
