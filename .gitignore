@@ -1,0 +1,8 @@
+.env
+__pycache__/
+node_modules/
+dist/
+fixtures/
+.venv/
+.pytest_cache/
+.ruff_cache/
