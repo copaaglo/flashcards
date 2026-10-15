@@ -11,4 +11,4 @@ RUN useradd --create-home appuser
 USER appuser
 
 # Listen on the "jobs" queue. sh -c lets us read REDIS_URL from the environment.
-CMD ["sh", "-c", "rq worker jobs --url \"$REDIS_URL\""]
+CMD ["sh", "-c", "exec rq worker jobs --url \"$REDIS_URL\""]
