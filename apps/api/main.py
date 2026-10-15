@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 
 import boto3
 import psycopg
+import redis
 from botocore.exceptions import ClientError
 from fastapi import FastAPI, HTTPException, UploadFile
 from redis import Redis
@@ -77,7 +78,14 @@ async def create_job(file: UploadFile):
         )
 
     # Enqueue by import path so the API doesn't need the worker's code or deps
-    queue.enqueue("worker.tasks.process_job", str(job_id), job_timeout=600)
+    try:
+        queue.enqueue("worker.tasks.process_job", str(job_id), job_timeout=600)
+    except redis.exceptions.ConnectionError:
+        # Nobody will ever process this job, so don't leave it "queued" forever.
+        # The client never got the job ID, so deleting the row is safe.
+        with psycopg.connect(DATABASE_URL) as conn:
+            conn.execute("DELETE FROM jobs WHERE id = %s", (job_id,))
+        raise HTTPException(503, "Job queue is unavailable, please try again shortly") from None
     return {"job_id": str(job_id), "status": "queued"}
 
 

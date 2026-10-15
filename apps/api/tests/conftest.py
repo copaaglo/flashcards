@@ -51,6 +51,9 @@ class FakeDB:
             job_id, filename, _s3_key = params
             self.jobs[job_id] = (job_id, filename, "queued", None, None)
             return FakeResult([])
+        if sql.startswith("DELETE FROM jobs"):
+            self.jobs.pop(params[0], None)
+            return FakeResult([])
         if sql.startswith("SELECT id, filename"):
             row = self.jobs.get(params[0])
             return FakeResult([row] if row else [])

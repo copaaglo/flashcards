@@ -1,5 +1,10 @@
 import uuid
 
+import redis
+from fastapi.testclient import TestClient
+
+import main
+
 PDF = b"%PDF-1.4\nnot parsed by the API, it only checks the header\n"
 MB = 1024 * 1024
 
@@ -103,3 +108,15 @@ def test_get_done_job_with_cards(client, db):
             {"question": "What is UDP?", "answer": "A fast one."},
         ],
     }
+
+
+# 5.5 Redis down during upload: must not leave a job stuck in "queued" forever
+def test_redis_down_does_not_leave_orphan_job(db, s3, queue):
+    queue.enqueue.side_effect = redis.exceptions.ConnectionError("Redis is down")
+    client = TestClient(main.app, raise_server_exceptions=False)
+
+    res = client.post("/jobs", files={"file": ("lec.pdf", PDF, "application/pdf")})
+
+    assert res.status_code == 503
+    stuck = [job for job in db.jobs.values() if job[2] == "queued"]
+    assert stuck == [], "a job row was left 'queued' that no worker will ever pick up"
