@@ -1,0 +1,16 @@
+# Local Kubernetes cluster for development. Create it with:
+#   kind create cluster --config deploy/local/kind-config.yaml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: flashcards
+nodes:
+  - role: control-plane
+    # Pinned by digest so everyone (and future you) gets the exact same Kubernetes
+    image: kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5
+    # Traefik listens on NodePort 30080 inside the node container.
+    # This maps it to localhost:8080 on your Mac, and only on localhost.
+    extraPortMappings:
+      - containerPort: 30080
+        hostPort: 8080
+        listenAddress: "127.0.0.1"
+        protocol: TCP

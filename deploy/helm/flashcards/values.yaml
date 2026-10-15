@@ -1,0 +1,60 @@
+# Default values: set up for the local kind cluster.
+# values-staging.yaml and values-prod.yaml only override what is different.
+
+image:
+  # Empty = local images loaded with "kind load". In week 5 this becomes ghcr.io/<you>.
+  registry: ""
+  # Always a commit SHA in real deploys. Pass it with --set image.tag=...
+  tag: dev
+  # IfNotPresent: use the image already on the node. Locally there is nowhere to pull from.
+  pullPolicy: IfNotPresent
+
+# Name of a Secret that already exists in the namespace. The chart reads it but never creates it,
+# so no secret value ever lives in Git. Keys: DATABASE_URL, AWS_ACCESS_KEY_ID,
+# AWS_SECRET_ACCESS_KEY, ANTHROPIC_API_KEY.
+existingSecret: flashcards-secrets
+
+# Non-secret settings, shared by api and worker through a ConfigMap
+config:
+  REDIS_URL: redis://redis:6379/0
+  S3_ENDPOINT: http://s3:8333
+  S3_BUCKET: uploads
+  AWS_DEFAULT_REGION: us-east-1
+  LLM_MODEL: claude-opus-5-5
+  FAKE_LLM: "1"
+
+web:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 64Mi
+
+api:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
+
+worker:
+  replicas: 1
+  # Time a worker gets to finish its current job when Kubernetes stops it (deploys, scale down)
+  terminationGracePeriodSeconds: 120
+  resources:
+    requests:
+      cpu: 50m
+      memory: 192Mi
+    limits:
+      memory: 512Mi
+
+ingress:
+  enabled: true
+  # k3s (week 6) also ships Traefik, so the same class name works there
+  className: traefik
+  # Empty = answer on any hostname (fine on localhost). Staging and prod set a real one.
+  host: ""

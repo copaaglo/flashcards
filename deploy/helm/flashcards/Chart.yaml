@@ -1,0 +1,6 @@
+apiVersion: v2
+name: flashcards
+description: Turns lecture PDFs into summaries and flashcards (web, api, worker)
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

@@ -45,6 +45,18 @@ jobs:
       - run: npm ci
       - run: npm run lint
 
+  lint-helm:
+    name: Lint (helm)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: helm version
+      - name: Lint the chart with each environment's values
+        run: |
+          helm lint --strict deploy/helm/flashcards
+          helm lint --strict deploy/helm/flashcards -f deploy/helm/flashcards/values-staging.yaml
+          helm lint --strict deploy/helm/flashcards -f deploy/helm/flashcards/values-prod.yaml
+
   test:
     name: Test (${{ matrix.app }})
     runs-on: ubuntu-latest
@@ -113,7 +125,7 @@ jobs:
   ci-passed:
     name: CI passed
     if: always()
-    needs: [lint-python, lint-web, test, build-and-scan]
+    needs: [lint-python, lint-web, lint-helm, test, build-and-scan]
     runs-on: ubuntu-latest
     steps:
       - name: Fail if any job failed or was cancelled
