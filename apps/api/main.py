@@ -13,7 +13,7 @@ DATABASE_URL = os.environ["DATABASE_URL"]
 REDIS_URL = os.environ["REDIS_URL"]
 S3_ENDPOINT = os.environ["S3_ENDPOINT"]
 S3_BUCKET = os.environ["S3_BUCKET"]
-MAX_UPLOAD_BYTES = 20 * 1024 * 1024  # 20 MB
+MAX_UPLOAD_BYTES = 30 * 1024 * 1024  # 20 MB
 
 s3 = boto3.client("s3", endpoint_url=S3_ENDPOINT)
 queue = Queue("jobs", connection=Redis.from_url(REDIS_URL))
