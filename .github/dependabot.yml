@@ -1,0 +1,8 @@
+# Opens PRs when there are new versions of the actions in our workflows,
+# so the pinned SHAs don't go stale
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
