@@ -1,0 +1,27 @@
+# Prod overrides. Not deployed yet (week 6). Only differences from values.yaml go here.
+
+image:
+  registry: ghcr.io/copaaglo
+  # Promoted from staging through a manual approval (week 5)
+
+config:
+  FAKE_LLM: "0"
+
+# Two of each, so one pod can die or be replaced during a deploy without downtime
+web:
+  replicas: 2
+
+api:
+  replicas: 2
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+
+worker:
+  replicas: 2
+
+ingress:
+  host: flashcards.example.com

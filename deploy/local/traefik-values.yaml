@@ -1,0 +1,12 @@
+# Settings for the Traefik ingress controller on the local kind cluster.
+# kind has no cloud load balancer, so expose Traefik on a fixed NodePort
+# that kind-config.yaml maps to localhost:8080.
+service:
+  spec:
+    type: NodePort
+ports:
+  web:
+    nodePort: 30080
+  websecure:
+    expose:
+      default: false

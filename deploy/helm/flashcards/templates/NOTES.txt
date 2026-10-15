@@ -1,0 +1,11 @@
+Deployed {{ .Release.Name }} with image tag {{ .Values.image.tag }} to namespace {{ .Release.Namespace }}.
+
+Watch the pods:
+  kubectl get pods -n {{ .Release.Namespace }}
+{{- if .Values.ingress.host }}
+
+Open https://{{ .Values.ingress.host }}
+{{- else }}
+
+Open http://localhost:8080 (local kind cluster)
+{{- end }}
