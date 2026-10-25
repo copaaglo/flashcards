@@ -1,0 +1,72 @@
+{{- if .Values.smokeTest.enabled }}
+# The script and the sample PDF, mounted into the Job as files
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smoke-test
+  labels:
+    {{- include "flashcards.labels" . | nindent 4 }}
+    app.kubernetes.io/component: smoke-test
+data:
+  smoke-test.sh: |
+    {{- .Files.Get "files/smoke-test.sh" | nindent 4 }}
+binaryData:
+  smoke.pdf: {{ .Files.Get "files/smoke.pdf" | b64enc }}
+---
+# Runs after every deploy. Helm runs it after install/upgrade, Argo CD maps the same
+# annotations to a PostSync hook. If it fails, the deploy (or the Argo CD sync) is marked failed.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: smoke-test
+  labels:
+    {{- include "flashcards.labels" . | nindent 4 }}
+    app.kubernetes.io/component: smoke-test
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    # Delete the previous run's Job right before creating the new one, so the last
+    # run (and its logs) stays around until the next deploy
+    helm.sh/hook-delete-policy: before-hook-creation
+spec:
+  # One try. A smoke test that passes on the third retry is hiding a problem.
+  backoffLimit: 0
+  activeDeadlineSeconds: 300
+  template:
+    metadata:
+      labels:
+        {{- include "flashcards.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: smoke-test
+    spec:
+      restartPolicy: Never
+      enableServiceLinks: false
+      containers:
+        - name: smoke-test
+          image: {{ .Values.smokeTest.image }}
+          # Talks to the web Service inside the cluster, so it goes through nginx to the api
+          # exactly like a browser would, minus the ingress
+          command: ["sh", "/smoke/smoke-test.sh", "/smoke/smoke.pdf", "http://web"]
+          volumeMounts:
+            - name: smoke
+              mountPath: /smoke
+              readOnly: true
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 64Mi
+          securityContext:
+            runAsNonRoot: true
+            # curl_user in the curl image
+            runAsUser: 100
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+      volumes:
+        - name: smoke
+          configMap:
+            name: smoke-test
+{{- end }}

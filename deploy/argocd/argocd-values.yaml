@@ -1,0 +1,17 @@
+# Settings for Argo CD on the local kind cluster.
+# Install with the helm command in guides/phase4 Step 6. Only overrides go here.
+
+configs:
+  cm:
+    # How often Argo CD checks Git for new commits. Default is 120s.
+    # kind can't receive GitHub webhooks (it isn't on the internet), so we poll a bit faster.
+    timeout.reconciliation: 60s
+    timeout.reconciliation.jitter: 10s
+
+# Things we don't use yet, turned off to save memory on your Mac
+dex:
+  enabled: false
+notifications:
+  enabled: false
+applicationSet:
+  replicas: 0

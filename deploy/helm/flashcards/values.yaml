@@ -58,3 +58,10 @@ ingress:
   className: traefik
   # Empty = answer on any hostname (fine on localhost). Staging and prod set a real one.
   host: ""
+
+# Post-deploy smoke test: a Job that uploads files/smoke.pdf and checks cards come back.
+# Off by default. values-staging.yaml turns it on so a bad deploy shows up as a failed sync.
+smokeTest:
+  enabled: false
+  # curl image, pinned by digest like the kind node image
+  image: curlimages/curl:8.22.0@sha256:58adaa4e8dca9c988bae2aba4ab3434a0bb2da16bbe3f92dec39ec7785166777

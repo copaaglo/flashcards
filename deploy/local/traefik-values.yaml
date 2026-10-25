@@ -10,3 +10,12 @@ ports:
   websecure:
     expose:
       default: false
+providers:
+  kubernetesIngress:
+    # Write 127.0.0.1 into each Ingress's status, since that's where kind serves it.
+    # Argo CD only marks an Ingress Healthy once its status has an address, and a
+    # NodePort Service on kind never gives Traefik one to copy.
+    publishedService:
+      enabled: false
+    ingressEndpoint:
+      ip: 127.0.0.1
