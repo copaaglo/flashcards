@@ -1,0 +1,28 @@
+# Tells Argo CD: keep namespace flashcards-staging in sync with the Helm chart on main,
+# rendered with values-staging.yaml. Apply once with:
+#   kubectl apply -n argocd -f deploy/argocd/flashcards-staging.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: flashcards-staging
+  namespace: argocd
+spec:
+  project: default
+  source:
+    # Public repo, so Argo CD needs no credentials to read it
+    repoURL: https://github.com/copaaglo/flashcards.git
+    targetRevision: main
+    path: deploy/helm/flashcards
+    helm:
+      releaseName: flashcards
+      valueFiles:
+        - values-staging.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: flashcards-staging
+  syncPolicy:
+    automated:
+      # Delete objects that were removed from Git
+      prune: true
+      # Undo changes made by hand in the cluster (drift)
+      selfHeal: true

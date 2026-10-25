@@ -1,13 +1,21 @@
-# Staging overrides. Not deployed yet: Argo CD uses this in week 5, the cloud cluster in week 6.
+# Staging overrides. Argo CD deploys the chart with this file on top of values.yaml.
+# Staging runs on the local kind cluster for now (namespace flashcards-staging).
+# In week 6 it moves to the cloud cluster and gets a real domain.
 # Only differences from values.yaml go here.
 
 image:
   registry: ghcr.io/copaaglo
-  # release.yml will write the commit SHA of each merge to main here (week 5)
+  # Written by release.yml on every merge to main that changes app code. Don't edit by hand.
+  tag: bootstrap
 
 config:
   # Real model calls, so staging behaves like prod. Costs a little per smoke test.
   FAKE_LLM: "0"
 
 ingress:
-  host: staging.flashcards.example.com
+  # Browsers and curl send *.localhost to 127.0.0.1, so this works on your Mac with no DNS.
+  # The dev release (no host) keeps answering on plain localhost:8080.
+  host: staging.localhost
+
+smokeTest:
+  enabled: true
