@@ -6,7 +6,7 @@
 image:
   registry: ghcr.io/copaaglo
   # Written by release.yml on every merge to main that changes app code. Don't edit by hand.
-  tag: bootstrap
+  tag: 68c35b4440b77f9c1a56cd09938b19430ebcf4d1
 
 config:
   # Real model calls, so staging behaves like prod. Costs a little per smoke test.
