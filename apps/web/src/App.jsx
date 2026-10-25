@@ -28,7 +28,7 @@ export default function App() {
 
   return (
     <main style={{ maxWidth: 700, margin: "2rem auto", fontFamily: "sans-serif" }}>
-      <h1>Lecture to Flashcards</h1>
+      <h1>Lecture to Flashcards (shipped by Argo CD)</h1>
       <form onSubmit={upload}>
         <input type="file" name="file" accept="application/pdf" required />
         <button type="submit">Upload</button>
