@@ -5,8 +5,20 @@ metadata:
   name: flashcards
   labels:
     {{- include "flashcards.labels" . | nindent 4 }}
+  {{- if .Values.tls.enabled }}
+  annotations:
+    # cert-manager watches for this, gets a certificate for the host below from the
+    # "letsencrypt" Issuer (issuer.yaml) and stores it in the flashcards-tls Secret
+    cert-manager.io/issuer: letsencrypt
+  {{- end }}
 spec:
   ingressClassName: {{ .Values.ingress.className }}
+  {{- if .Values.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ required "tls.enabled needs ingress.host" .Values.ingress.host | quote }}
+      secretName: flashcards-tls
+  {{- end }}
   rules:
     - http:
         paths:

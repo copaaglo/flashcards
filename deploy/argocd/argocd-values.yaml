@@ -1,14 +1,15 @@
-# Settings for Argo CD on the local kind cluster.
-# Install with the helm command in guides/phase4 Step 6. Only overrides go here.
+# Settings for Argo CD, on the local kind cluster and on the cloud clusters.
+# Locally: the helm command in guides/phase4 Step 8. Cloud: deploy/cloud/bootstrap.sh.
+# Only overrides go here.
 
 configs:
   cm:
     # How often Argo CD checks Git for new commits. Default is 120s.
-    # kind can't receive GitHub webhooks (it isn't on the internet), so we poll a bit faster.
+    # Without a GitHub webhook (see Known gaps), polling is how it notices a merge.
     timeout.reconciliation: 60s
     timeout.reconciliation.jitter: 10s
 
-# Things we don't use yet, turned off to save memory on your Mac
+# Things we don't use yet, turned off to save memory
 dex:
   enabled: false
 notifications:

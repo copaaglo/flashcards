@@ -70,7 +70,7 @@ jobs:
     # allows the main branch, so a workflow on any other branch can't read it
     environment:
       name: staging
-      url: http://staging.localhost:8080
+      url: https://staging.app.cramcards.ca
     steps:
       - uses: actions/checkout@v7
         with:

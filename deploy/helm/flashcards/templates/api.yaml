@@ -31,7 +31,7 @@ spec:
             - configMapRef:
                 name: flashcards-config
           env:
-            {{- include "flashcards.secretEnv" (list .Values.existingSecret (list "DATABASE_URL" "AWS_ACCESS_KEY_ID" "AWS_SECRET_ACCESS_KEY")) | trim | nindent 12 }}
+            {{- include "flashcards.secretEnv" (list .Values.existingSecret .Values.secretKeys.api) | trim | nindent 12 }}
           readinessProbe:
             httpGet:
               path: /health

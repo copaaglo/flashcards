@@ -12,7 +12,7 @@ from rq import Queue
 
 DATABASE_URL = os.environ["DATABASE_URL"]
 REDIS_URL = os.environ["REDIS_URL"]
-S3_ENDPOINT = os.environ["S3_ENDPOINT"]
+S3_ENDPOINT = os.environ.get("S3_ENDPOINT") or None  # unset or empty = real AWS S3
 S3_BUCKET = os.environ["S3_BUCKET"]
 MAX_UPLOAD_BYTES = 20 * 1024 * 1024  # 20 MB
 

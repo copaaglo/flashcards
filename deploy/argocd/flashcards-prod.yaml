@@ -1,0 +1,32 @@
+# Tells Argo CD: keep namespace flashcards-prod in sync with the Helm chart on main,
+# rendered with values-prod.yaml. Argo CD runs inside the prod cloud cluster, and
+# deploy/cloud/bootstrap.sh applies this file when the cluster is created.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: flashcards-prod
+  namespace: argocd
+spec:
+  project: default
+  source:
+    # Public repo, so Argo CD needs no credentials to read it
+    repoURL: https://github.com/copaaglo/flashcards.git
+    targetRevision: main
+    path: deploy/helm/flashcards
+    helm:
+      releaseName: flashcards
+      valueFiles:
+        - values-prod.yaml
+  destination:
+    # "This cluster", the one Argo CD runs in
+    server: https://kubernetes.default.svc
+    namespace: flashcards-prod
+  syncPolicy:
+    automated:
+      # Delete objects that were removed from Git
+      prune: true
+      # Undo changes made by hand in the cluster (drift)
+      selfHeal: true
+    syncOptions:
+      # Create the namespace on the first sync, so there's no manual step to forget
+      - CreateNamespace=true
