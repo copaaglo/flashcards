@@ -5,7 +5,7 @@ image:
   registry: ghcr.io/copaaglo
   # Copied from values-staging.yaml by the "Promote to prod" workflow, after someone
   # approves it. Prod only ever runs images that ran on staging first. Don't edit by hand.
-  tag: bootstrap
+  tag: 107f9e5405f70f0dd9bc6a052779b55e541c063d
 
 config:
   FAKE_LLM: "0"
