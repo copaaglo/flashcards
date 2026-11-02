@@ -1,0 +1,12 @@
+#!/bin/bash
+# Runs once, as root, on the VM's first boot. Terraform fills in the values in curly braces.
+# Output goes to /var/log/cloud-init-output.log on the VM.
+set -euo pipefail
+
+# k3s: a whole Kubernetes in one binary, pinned to a version like everything else.
+# --secrets-encryption encrypts Secrets in k3s's database on disk.
+curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="${k3s_version}" sh -s - server --secrets-encryption
+
+# The rest of the setup lives in Git, where you can read and review it
+git clone --depth 1 "${repo_url}" /opt/flashcards
+bash /opt/flashcards/deploy/cloud/bootstrap.sh "${environment}"

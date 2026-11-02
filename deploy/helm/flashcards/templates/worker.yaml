@@ -29,7 +29,7 @@ spec:
             - configMapRef:
                 name: flashcards-config
           env:
-            {{- include "flashcards.secretEnv" (list .Values.existingSecret (list "DATABASE_URL" "AWS_ACCESS_KEY_ID" "AWS_SECRET_ACCESS_KEY" "ANTHROPIC_API_KEY")) | trim | nindent 12 }}
+            {{- include "flashcards.secretEnv" (list .Values.existingSecret .Values.secretKeys.worker) | trim | nindent 12 }}
           resources:
             {{- toYaml .Values.worker.resources | nindent 12 }}
           securityContext:

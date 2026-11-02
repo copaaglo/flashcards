@@ -8,7 +8,7 @@ from pypdf import PdfReader
 from worker.llm import generate_study_set
 
 DATABASE_URL = os.environ["DATABASE_URL"]
-S3_ENDPOINT = os.environ["S3_ENDPOINT"]
+S3_ENDPOINT = os.environ.get("S3_ENDPOINT") or None  # unset or empty = real AWS S3
 S3_BUCKET = os.environ["S3_BUCKET"]
 
 s3 = boto3.client("s3", endpoint_url=S3_ENDPOINT)

@@ -7,3 +7,10 @@ fixtures/
 .pytest_cache/
 .ruff_cache/
 .DS_Store
+
+# Terraform: provider downloads, state (contains secrets) and variable files (personal values)
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+crash.log

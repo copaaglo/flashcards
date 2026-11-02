@@ -1,0 +1,20 @@
+{{- if .Values.tls.enabled }}
+# Tells cert-manager how to get certificates: from Let's Encrypt, proving we own the
+# domain by answering an HTTP request on it (the "HTTP-01 challenge") through Traefik.
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: letsencrypt
+  labels:
+    {{- include "flashcards.labels" . | nindent 4 }}
+spec:
+  acme:
+    server: {{ .Values.tls.acmeServer }}
+    # cert-manager creates this Secret itself: the key for our Let's Encrypt account
+    privateKeySecretRef:
+      name: letsencrypt-account-key
+    solvers:
+      - http01:
+          ingress:
+            ingressClassName: {{ .Values.ingress.className }}
+{{- end }}

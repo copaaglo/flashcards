@@ -57,6 +57,26 @@ jobs:
           helm lint --strict deploy/helm/flashcards -f deploy/helm/flashcards/values-staging.yaml
           helm lint --strict deploy/helm/flashcards -f deploy/helm/flashcards/values-prod.yaml
 
+  lint-terraform:
+    name: Lint (terraform)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: 1.16.7
+          # Plain terraform output, no wrapper script around it
+          terraform_wrapper: false
+      - name: Formatting
+        run: terraform fmt -check -recursive -diff infra/terraform
+      - name: Validate each root (no AWS credentials needed)
+        run: |
+          for root in bootstrap global envs/staging envs/prod; do
+            echo "== $root"
+            terraform -chdir="infra/terraform/$root" init -backend=false -input=false
+            terraform -chdir="infra/terraform/$root" validate
+          done
+
   test:
     name: Test (${{ matrix.app }})
     runs-on: ubuntu-latest
@@ -125,7 +145,7 @@ jobs:
   ci-passed:
     name: CI passed
     if: always()
-    needs: [lint-python, lint-web, lint-helm, test, build-and-scan]
+    needs: [lint-python, lint-web, lint-helm, lint-terraform, test, build-and-scan]
     runs-on: ubuntu-latest
     steps:
       - name: Fail if any job failed or was cancelled

@@ -1,0 +1,71 @@
+name: Promote to prod
+
+# Copies the image tag that staging runs into values-prod.yaml. Argo CD on the prod
+# cluster sees that commit and deploys it. The job waits for a person to approve it
+# (the production Environment has required reviewers), so nothing reaches prod by itself.
+on:
+  # After every successful release: offer the new staging version to prod
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
+  # A "Run workflow" button: promote whatever staging runs right now
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One promotion at a time. A newer one waits instead of racing it.
+concurrency:
+  group: promote-prod
+  cancel-in-progress: false
+
+jobs:
+  promote-prod:
+    name: Promote to prod
+    # Only after a release that succeeded (a failed release never reached staging)
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    # Required reviewers on this environment make the job pause until someone approves.
+    # Its DEPLOY_KEY secret is a second deploy key, only for prod promotions.
+    environment: production
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Latest main, read after the approval: prod gets what staging runs at that moment
+          ref: main
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
+
+      - name: Copy the staging image tag to prod
+        env:
+          FROM: deploy/helm/flashcards/values-staging.yaml
+          TO: deploy/helm/flashcards/values-prod.yaml
+        run: |
+          TAG="$(yq '.image.tag' "$FROM")"
+          # Only ever a full commit SHA, never "bootstrap" or anything else
+          if ! echo "$TAG" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "Staging runs '$TAG', which is not a commit SHA. Nothing to promote."
+            exit 1
+          fi
+          sed -i -E "s/^  tag: .*/  tag: ${TAG}/" "$TO"
+          test "$(yq '.image.tag' "$TO")" = "$TAG"
+          echo "TAG=$TAG" >> "$GITHUB_ENV"
+          git diff
+
+      - name: Commit and push to main
+        run: |
+          git config user.name "flashcards-deploy-bot"
+          git config user.email "flashcards-deploy-bot@users.noreply.github.com"
+          git add deploy/helm/flashcards/values-prod.yaml
+          if git diff --cached --quiet; then
+            echo "Prod already runs $TAG"
+            exit 0
+          fi
+          git commit -m "Deploy ${TAG:0:7} to prod [skip ci]" -m "Promoted from staging by run $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID, approved in the production environment"
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "Push rejected (main moved). Rebasing and retrying, attempt $attempt"
+            git pull --rebase origin main
+          done
+          exit 1

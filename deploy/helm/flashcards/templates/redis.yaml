@@ -1,0 +1,68 @@
+{{- if .Values.redis.enabled }}
+# Redis for the job queue, in the cloud clusters. No disk on purpose: it only holds
+# job IDs waiting for a worker. A managed Redis (ElastiCache) would add about $12/month.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  labels:
+    {{- include "flashcards.labels" . | nindent 4 }}
+    app.kubernetes.io/component: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "flashcards.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: redis
+  template:
+    metadata:
+      # Selector labels only, no version label: a deploy of new app code shouldn't restart Redis
+      labels:
+        {{- include "flashcards.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: redis
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: redis
+          image: {{ .Values.redis.image }}
+          # Never write snapshots to disk (there is no disk to write to)
+          args: ["--save", "", "--appendonly", "no"]
+          ports:
+            - name: redis
+              containerPort: 6379
+          readinessProbe:
+            exec:
+              command: ["redis-cli", "ping"]
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+          securityContext:
+            runAsNonRoot: true
+            # The redis user in the official image
+            runAsUser: 999
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  labels:
+    {{- include "flashcards.labels" . | nindent 4 }}
+    app.kubernetes.io/component: redis
+spec:
+  selector:
+    {{- include "flashcards.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: redis
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: redis
+{{- end }}

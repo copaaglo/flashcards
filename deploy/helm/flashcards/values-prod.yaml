@@ -1,11 +1,27 @@
-# Prod overrides. Not deployed yet (week 6). Only differences from values.yaml go here.
+# Prod overrides. Argo CD on the prod cloud cluster (infra/terraform/envs/prod) deploys
+# the chart with this file on top of values.yaml. Only differences from values.yaml go here.
 
 image:
   registry: ghcr.io/copaaglo
-  # Promoted from staging through a manual approval (week 5)
+  # Copied from values-staging.yaml by the "Promote to prod" workflow, after someone
+  # approves it. Prod only ever runs images that ran on staging first. Don't edit by hand.
+  tag: bootstrap
 
 config:
   FAKE_LLM: "0"
+  S3_ENDPOINT: ""
+  S3_BUCKET: copaaglo-flashcards-prod-uploads
+
+secretKeys:
+  api: [DATABASE_URL]
+  worker: [DATABASE_URL, ANTHROPIC_API_KEY]
+
+externalSecrets:
+  enabled: true
+  prefix: flashcards/prod
+
+redis:
+  enabled: true
 
 # Two of each, so one pod can die or be replaced during a deploy without downtime
 web:
@@ -24,4 +40,12 @@ worker:
   replicas: 2
 
 ingress:
-  host: flashcards.example.com
+  # Prod answers on the bare domain
+  host: app.cramcards.ca
+
+tls:
+  enabled: true
+
+# Same check as staging after every prod deploy. One real LLM call, about a cent.
+smokeTest:
+  enabled: true

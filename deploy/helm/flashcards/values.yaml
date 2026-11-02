@@ -65,3 +65,26 @@ smokeTest:
   enabled: false
   # curl image, pinned by digest like the kind node image
   image: curlimages/curl:8.22.0@sha256:58adaa4e8dca9c988bae2aba4ab3434a0bb2da16bbe3f92dec39ec7785166777
+
+# Which keys of existingSecret each app reads. Only the worker gets the Anthropic key.
+# In the cloud the AWS keys go away: pods use the VM's IAM role instead (see values-staging.yaml).
+secretKeys:
+  api: [DATABASE_URL, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY]
+  worker: [DATABASE_URL, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, ANTHROPIC_API_KEY]
+
+# Make existingSecret from AWS Secrets Manager with External Secrets. Cloud only.
+externalSecrets:
+  enabled: false
+  region: us-east-1
+  # Secret names in Secrets Manager start with this, like flashcards/staging
+  prefix: ""
+
+# Redis (the job queue) as part of the chart. Cloud only: locally, dev-deps.yaml runs it.
+redis:
+  enabled: false
+  image: redis:7
+
+# HTTPS with a free Let's Encrypt certificate, requested by cert-manager. Needs ingress.host.
+tls:
+  enabled: false
+  acmeServer: https://acme-v02.api.letsencrypt.org/directory

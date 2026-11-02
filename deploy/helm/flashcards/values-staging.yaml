@@ -1,21 +1,38 @@
-# Staging overrides. Argo CD deploys the chart with this file on top of values.yaml.
-# Staging runs on the local kind cluster for now (namespace flashcards-staging).
-# In week 6 it moves to the cloud cluster and gets a real domain.
+# Staging overrides. Argo CD on the staging cloud cluster (k3s on AWS, built by
+# infra/terraform/envs/staging) deploys the chart with this file on top of values.yaml.
 # Only differences from values.yaml go here.
 
 image:
   registry: ghcr.io/copaaglo
   # Written by release.yml on every merge to main that changes app code. Don't edit by hand.
-  tag: 68c35b4440b77f9c1a56cd09938b19430ebcf4d1
+  tag: bootstrap
 
 config:
   # Real model calls, so staging behaves like prod. Costs a little per smoke test.
   FAKE_LLM: "0"
+  # Empty = the app uses AWS's normal S3 endpoint instead of the local SeaweedFS
+  S3_ENDPOINT: ""
+  # Made by Terraform (modules/bucket)
+  S3_BUCKET: copaaglo-flashcards-staging-uploads
+
+# No AWS keys: pods get AWS access from the VM's IAM role
+secretKeys:
+  api: [DATABASE_URL]
+  worker: [DATABASE_URL, ANTHROPIC_API_KEY]
+
+# flashcards-secrets is built from Secrets Manager entries named flashcards/staging/...
+externalSecrets:
+  enabled: true
+  prefix: flashcards/staging
+
+redis:
+  enabled: true
 
 ingress:
-  # Browsers and curl send *.localhost to 127.0.0.1, so this works on your Mac with no DNS.
-  # The dev release (no host) keeps answering on plain localhost:8080.
-  host: staging.localhost
+  host: staging.app.cramcards.ca
+
+tls:
+  enabled: true
 
 smokeTest:
   enabled: true
