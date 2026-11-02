@@ -10,6 +10,11 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 6.68.0"
     }
+    # Zips the kill switch Lambda's code (kill-switch.tf)
+    archive = {
+      source  = "hashicorp/archive"
+      version = "~> 2.7"
+    }
   }
 
   # State lives in the bucket from the bootstrap root. use_lockfile makes Terraform
