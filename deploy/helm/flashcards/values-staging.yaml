@@ -5,7 +5,7 @@
 image:
   registry: ghcr.io/copaaglo
   # Written by release.yml on every merge to main that changes app code. Don't edit by hand.
-  tag: 26edec8b883977ed6ad6aefa6731b8171914efdb
+  tag: 533b6af41fad03e6c051fdc7402d529ce1f089bc
 
 config:
   # Real model calls, so staging behaves like prod. Costs a little per smoke test.
