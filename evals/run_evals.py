@@ -73,8 +73,8 @@ def main() -> int:
     parser.add_argument(
         "--threshold",
         type=float,
-        default=float(os.environ.get("EVAL_THRESHOLD", "0.85")),
-        help="lowest overall score that passes (default 0.85)",
+        default=float(os.environ.get("EVAL_THRESHOLD", "0.93")),
+        help="lowest overall score that passes (default 0.93)",
     )
     args = parser.parse_args()
 

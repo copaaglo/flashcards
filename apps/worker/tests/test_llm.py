@@ -53,6 +53,8 @@ def test_sends_lecture_and_prompt_to_model(fake_client):
     assert request["system"] == llm.PROMPT
     assert request["output_format"] is StudySet
     assert "<lecture>\nPascal's law\n</lecture>" in request["messages"][0]["content"]
+    # Code counts the words and tells the model how many cards to write
+    assert "2 words long. Write between 5 and 10 flashcards." in request["messages"][0]["content"]
 
 
 def test_refusal_raises(fake_client):

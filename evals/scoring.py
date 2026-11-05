@@ -10,7 +10,7 @@ from difflib import SequenceMatcher
 
 from pydantic import ValidationError
 
-from worker.llm import StudySet
+from worker.llm import StudySet, card_range
 
 # Common words that say nothing about whether an answer came from the lecture
 STOPWORDS = set(
@@ -26,15 +26,6 @@ def words(text: str) -> list[str]:
     """Lowercase content words, with a crude plural strip so "cards" matches "card"."""
     found = re.findall(r"[a-z0-9]+(?:'[a-z]+)?", text.lower())
     return [w.removesuffix("s") if len(w) > 4 else w for w in found if w not in STOPWORDS]
-
-
-def card_range(lecture_words: int) -> tuple[int, int]:
-    """How many cards make sense for a lecture this long. Matches the prompt's 5 to 20."""
-    if lecture_words < 300:
-        return 5, 10
-    if lecture_words < 1000:
-        return 5, 15
-    return 8, 20
 
 
 def check_schema(raw: dict) -> float:

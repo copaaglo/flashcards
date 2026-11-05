@@ -28,6 +28,15 @@ LLM_TOKENS = Counter("flashcards_llm_tokens", "Tokens used by LLM calls", ["mode
 LLM_COST = Counter("flashcards_llm_cost_dollars", "Estimated LLM spend in US dollars", ["model"])
 
 
+def card_range(lecture_words: int) -> tuple[int, int]:
+    """How many cards to ask for. The evals score against this same function."""
+    if lecture_words < 300:
+        return 5, 10
+    if lecture_words < 1000:
+        return 5, 15
+    return 8, 20
+
+
 class Card(BaseModel):
     question: str
     answer: str
@@ -53,12 +62,17 @@ def generate_study_set(text: str) -> StudySet:
     if len(text) > MAX_CHARS:
         raise ValueError(f"Lecture is too long ({len(text)} chars, max {MAX_CHARS})")
 
+    # Models can't count words reliably, so code does the counting and states the target
+    words = len(text.split())
+    low, high = card_range(words)
+    length_hint = f"This lecture is {words} words long. Write between {low} and {high} flashcards."
+
     client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY from the environment
     response = client.messages.parse(
         model=MODEL,
         max_tokens=16000,
         system=PROMPT,
-        messages=[{"role": "user", "content": f"<lecture>\n{text}\n</lecture>"}],
+        messages=[{"role": "user", "content": f"<lecture>\n{text}\n</lecture>\n\n{length_hint}"}],
         output_config={"effort": "low"},
         output_format=StudySet,  # the SDK forces valid JSON matching this schema
     )
