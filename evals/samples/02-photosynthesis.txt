@@ -1,0 +1,11 @@
+Biology 101, Lecture 12: Photosynthesis
+
+Photosynthesis is the process plants, algae and some bacteria use to turn light energy into chemical energy stored in glucose. The overall equation is: carbon dioxide plus water, with light energy, produces glucose and oxygen. In plants it happens in chloroplasts, mostly in the leaf cells called mesophyll.
+
+Chloroplasts contain the pigment chlorophyll, which absorbs red and blue light and reflects green light. That is why leaves look green.
+
+Photosynthesis has two stages. The light-dependent reactions happen in the thylakoid membranes. Light excites electrons in chlorophyll, water molecules are split, and oxygen is released as a by-product. The energy is captured in two carrier molecules, ATP and NADPH.
+
+The light-independent reactions, also called the Calvin cycle, happen in the stroma. The enzyme RuBisCO fixes carbon dioxide from the air onto a five-carbon sugar. Using the ATP and NADPH from the first stage, the cycle produces a three-carbon sugar called G3P, which the plant uses to build glucose and other organic molecules.
+
+The rate of photosynthesis is limited by light intensity, carbon dioxide concentration and temperature. Whichever factor is in shortest supply is the limiting factor.

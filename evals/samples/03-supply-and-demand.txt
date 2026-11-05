@@ -1,0 +1,13 @@
+Introduction to Microeconomics, Lecture 3: Supply and Demand
+
+A market is any place where buyers and sellers trade a good or service. The price in a competitive market is set by supply and demand.
+
+The law of demand says that, all else equal, when the price of a good rises, the quantity demanded falls. The demand curve slopes downward. A change in price moves us along the curve. A change in anything else, such as income, the price of related goods, tastes or expectations, shifts the whole curve. For a normal good, higher income shifts demand to the right. For an inferior good, higher income shifts demand to the left. Substitutes are goods used in place of each other, like coffee and tea: if the price of tea rises, demand for coffee increases. Complements are used together, like printers and ink.
+
+The law of supply says that when the price rises, the quantity supplied rises, so the supply curve slopes upward. Supply shifts when input costs, technology, the number of sellers or expectations change. Cheaper inputs or better technology shift supply to the right.
+
+Equilibrium is the price at which quantity demanded equals quantity supplied. If the price is above equilibrium there is a surplus, and sellers cut prices. If the price is below equilibrium there is a shortage, and buyers bid prices up.
+
+A price ceiling is a legal maximum price. If it is set below equilibrium, as with rent control, it causes a shortage. A price floor is a legal minimum price. If it is set above equilibrium, as with a minimum wage, it can cause a surplus.
+
+Price elasticity of demand measures how strongly quantity demanded responds to price. It equals the percentage change in quantity demanded divided by the percentage change in price. Demand is elastic when the absolute value is greater than one and inelastic when it is less than one. Goods with few substitutes, like insulin or gasoline in the short run, tend to have inelastic demand. If demand is inelastic, raising the price increases total revenue. If demand is elastic, raising the price decreases total revenue.

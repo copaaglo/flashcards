@@ -49,3 +49,13 @@ tls:
 # Same check as staging after every prod deploy. One real LLM call, about a cent.
 smokeTest:
   enabled: true
+
+# Phase 6 runs monitoring and autoscaling on kind only so far: the cloud clusters don't
+# have kube-prometheus-stack, metrics-server or KEDA installed yet (see the Phase 6 guide)
+monitoring:
+  enabled: false
+autoscaling:
+  api:
+    enabled: false
+  worker:
+    enabled: false

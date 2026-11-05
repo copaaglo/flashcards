@@ -1,0 +1,19 @@
+Data Structures and Algorithms, Lecture 2: Big O Notation
+
+Big O notation describes how the running time or memory use of an algorithm grows as the input size n grows. It ignores constant factors and lower order terms, because for large n the fastest growing term dominates. For example, an algorithm that takes 3n squared plus 5n plus 2 steps is O(n squared).
+
+Common classes, from fastest to slowest growth:
+O(1), constant time: accessing an array element by index, or pushing onto a stack.
+O(log n), logarithmic time: binary search on a sorted array, because each step halves the remaining range.
+O(n), linear time: scanning every element of a list once, such as finding the maximum.
+O(n log n): efficient comparison sorts such as merge sort and heapsort.
+O(n squared), quadratic time: nested loops over the same input, such as bubble sort or comparing every pair.
+O(2 to the n), exponential time: trying every subset, such as the naive solution to the subset sum problem.
+
+Big O gives an upper bound. Big Omega gives a lower bound, and Big Theta means the upper and lower bounds match. In practice, people often say Big O when they mean a tight bound.
+
+We usually analyse the worst case. Quicksort is O(n log n) on average but O(n squared) in the worst case, when the pivot is always the smallest or largest element. Hash table lookups are O(1) on average but O(n) in the worst case, when every key collides into the same bucket.
+
+Space complexity uses the same notation for memory. Merge sort needs O(n) extra space for merging, while heapsort sorts in place with O(1) extra space.
+
+Amortized analysis averages the cost over a sequence of operations. Appending to a dynamic array is usually O(1), but occasionally the array is full and must be copied into one twice as large, which costs O(n). Because doubling makes those copies rare, the amortized cost of each append is still O(1).

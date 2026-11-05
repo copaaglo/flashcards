@@ -14,3 +14,6 @@ fixtures/
 *.tfstate.*
 *.tfvars
 crash.log
+
+# Eval outputs (full model responses), regenerated on every run
+evals/results/

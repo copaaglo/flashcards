@@ -33,6 +33,7 @@ web:
       memory: 64Mi
 
 api:
+  # Ignored while autoscaling.api is on
   replicas: 1
   resources:
     requests:
@@ -42,9 +43,11 @@ api:
       memory: 256Mi
 
 worker:
+  # Ignored while autoscaling.worker is on
   replicas: 1
-  # Time a worker gets to finish its current job when Kubernetes stops it (deploys, scale down)
-  terminationGracePeriodSeconds: 120
+  # Time a worker gets to finish its current job when Kubernetes stops it (deploys, scale down).
+  # Longer than the API's job_timeout (600s), so no job is ever killed halfway.
+  terminationGracePeriodSeconds: 630
   resources:
     requests:
       cpu: 50m
@@ -65,6 +68,30 @@ smokeTest:
   enabled: false
   # curl image, pinned by digest like the kind node image
   image: curlimages/curl:8.22.0@sha256:58adaa4e8dca9c988bae2aba4ab3434a0bb2da16bbe3f92dec39ec7785166777
+
+autoscaling:
+  # Horizontal Pod Autoscaler on CPU. Needs metrics-server in the cluster.
+  api:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    # Percent of the api's CPU request (50m), averaged over all api pods
+    targetCPUUtilizationPercentage: 70
+  # KEDA scales workers on the number of jobs waiting in Redis, down to zero when idle.
+  # Needs KEDA in the cluster.
+  worker:
+    enabled: true
+    minReplicas: 0
+    maxReplicas: 5
+    # Aim for this many waiting jobs per worker: 6 waiting jobs = 3 workers
+    jobsPerWorker: 2
+    # Seconds with an empty queue before going from 1 worker to 0
+    cooldownSeconds: 300
+
+# PodMonitors, alert rules and a Grafana dashboard for kube-prometheus-stack.
+# Needs the Prometheus Operator's CRDs in the cluster.
+monitoring:
+  enabled: true
 
 # Which keys of existingSecret each app reads. Only the worker gets the Anthropic key.
 # In the cloud the AWS keys go away: pods use the VM's IAM role instead (see values-staging.yaml).

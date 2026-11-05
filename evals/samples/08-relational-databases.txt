@@ -1,0 +1,17 @@
+Database Systems, Lecture 3: The Relational Model and SQL
+
+A relational database stores data in tables, also called relations. Each table has columns, called attributes, with a fixed data type, and rows, called tuples. The relational model was proposed by Edgar Codd at IBM in 1970.
+
+Keys identify rows. A primary key is a column or set of columns whose value is unique for every row and never null, such as a student number. A foreign key is a column that refers to the primary key of another table, which is how tables are linked. For example, an enrolments table can have a student_id foreign key pointing to the students table. The database enforces referential integrity: you cannot insert an enrolment for a student who does not exist.
+
+SQL, the Structured Query Language, is used to define and query relational data. SELECT chooses columns, FROM names the tables, WHERE filters rows, GROUP BY groups rows that share values so aggregate functions like COUNT, SUM and AVG can be applied to each group, HAVING filters groups after aggregation, and ORDER BY sorts the result.
+
+A join combines rows from two tables. An inner join returns only rows that have a match in both tables. A left outer join returns every row from the left table, with nulls where the right table has no match.
+
+Normalization organizes tables to reduce duplicated data and the update anomalies it causes. First normal form requires every column to hold a single atomic value, with no repeating groups. Second normal form requires that every non-key column depends on the whole primary key, not just part of a composite key. Third normal form requires that non-key columns depend only on the key and not on other non-key columns. A common summary is that every non-key attribute must depend on the key, the whole key, and nothing but the key.
+
+Indexes speed up lookups, usually with a B-tree, at the cost of extra storage and slower inserts and updates, because the index must be updated too.
+
+A transaction is a group of operations that succeed or fail together. Transactions have the ACID properties. Atomicity means all of the transaction happens or none of it does. Consistency means a transaction moves the database from one valid state to another. Isolation means concurrent transactions do not see each other's partial work. Durability means once a transaction commits, it survives crashes. For example, a bank transfer debits one account and credits another in a single transaction, so money is never lost halfway.
+
+Relational databases are a good fit when data is structured, relationships matter and correctness is important. Popular systems include PostgreSQL, MySQL, SQLite, Oracle and Microsoft SQL Server.

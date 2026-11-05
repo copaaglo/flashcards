@@ -1,0 +1,11 @@
+Computer Networks, Lecture 7: TCP and UDP
+
+The transport layer moves data between processes on two hosts. The two main transport protocols on the internet are TCP and UDP. Both use port numbers to deliver data to the right process, but they make very different promises.
+
+TCP (Transmission Control Protocol) is connection oriented. Before any data is sent, the client and server perform a three-way handshake: the client sends SYN, the server replies with SYN-ACK, and the client answers with ACK. TCP guarantees reliable, in-order delivery. Every byte has a sequence number, the receiver sends acknowledgements, and segments that are not acknowledged before a timeout are retransmitted.
+
+TCP also provides flow control and congestion control. Flow control uses the receive window, so a fast sender cannot overwhelm a slow receiver. Congestion control protects the network itself: the sender starts with slow start, doubling its congestion window every round trip, and cuts the window when it detects loss.
+
+UDP (User Datagram Protocol) is connectionless. There is no handshake, no acknowledgements, no retransmission and no ordering. Each datagram is sent on its own and may be lost, duplicated or arrive out of order. The UDP header is only 8 bytes, compared with at least 20 bytes for TCP.
+
+Applications choose UDP when low latency matters more than perfect delivery, such as voice calls, live video and online games, or when the application handles reliability itself. DNS queries usually use UDP because a single small request and reply is faster without a handshake. Web pages, email and file transfers use TCP because every byte must arrive correctly.

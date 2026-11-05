@@ -129,6 +129,67 @@ jobs:
           exit-code: "1"
           format: table
 
+  # Decides which optional jobs this PR needs, from the files it changes
+  changes:
+    name: Detect changes
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      evals: ${{ steps.filter.outputs.evals }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Full history, so the PR's base commit is here to diff against
+          fetch-depth: 0
+      - id: filter
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git diff --name-only "$BASE" HEAD | tee changed.txt
+          # The AI's output can only change if the prompt, the worker's code or its
+          # packages, or the evals themselves change
+          if grep -qE '^(apps/worker/|evals/|\.github/workflows/ci\.yml$)' changed.txt; then
+            echo "evals=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "evals=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # Real LLM calls on sample lectures, scored. Costs a few cents, so only when needed.
+  evals:
+    name: AI evals
+    needs: changes
+    if: needs.changes.outputs.evals == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            evals/requirements.txt
+            apps/worker/requirements.txt
+      - run: pip install -r evals/requirements.txt
+      - name: Unit tests for the scoring code
+        working-directory: evals
+        run: pytest -v
+      - name: Run evals
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::error::ANTHROPIC_API_KEY secret is missing (Dependabot PRs need it under Dependabot secrets too)"
+            exit 1
+          fi
+          python evals/run_evals.py
+      # Every card the model wrote, downloadable from the run page, for when a score drops
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: eval-results
+          path: evals/results/latest.json
+          if-no-files-found: ignore
+
   # Optional deeper analysis. Not in ci-passed, so a SonarCloud outage can't block merges
   sonarcloud:
     name: SonarCloud
@@ -145,7 +206,8 @@ jobs:
   ci-passed:
     name: CI passed
     if: always()
-    needs: [lint-python, lint-web, lint-helm, lint-terraform, test, build-and-scan]
+    # A skipped job (evals on a PR that didn't touch the worker) is fine, a failed one is not
+    needs: [lint-python, lint-web, lint-helm, lint-terraform, test, build-and-scan, evals]
     runs-on: ubuntu-latest
     steps:
       - name: Fail if any job failed or was cancelled

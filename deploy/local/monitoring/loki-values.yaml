@@ -1,0 +1,62 @@
+# Loki on the LOCAL kind cluster: one pod ("single binary"), logs on a small local disk.
+# Production Loki splits into many components and keeps logs in S3 (see Known gaps).
+# Install (Step 10 of the Phase 6 guide):
+#   helm install loki grafana/loki --version 7.5.0 -n monitoring -f deploy/local/monitoring/loki-values.yaml
+
+deploymentMode: SingleBinary
+
+loki:
+  # One tenant, no login between Alloy, Grafana and Loki (fine inside one cluster)
+  auth_enabled: false
+  commonConfig:
+    replication_factor: 1
+  storage:
+    type: filesystem
+  schemaConfig:
+    configs:
+      - from: "2024-04-01"
+        store: tsdb
+        object_store: filesystem
+        schema: v13
+        index:
+          prefix: loki_index_
+          period: 24h
+  # Delete logs older than 3 days
+  limits_config:
+    retention_period: 72h
+  compactor:
+    retention_enabled: true
+    delete_request_store: filesystem
+
+singleBinary:
+  replicas: 1
+  persistence:
+    size: 2Gi
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
+
+# The scalable-mode components, off
+read:
+  replicas: 0
+write:
+  replicas: 0
+backend:
+  replicas: 0
+
+# Memcached caches. On by default and they ask for gigabytes of memory, so off on a laptop.
+chunksCache:
+  enabled: false
+resultsCache:
+  enabled: false
+
+# Extras we don't need locally
+gateway:
+  enabled: false
+lokiCanary:
+  enabled: false
+test:
+  enabled: false

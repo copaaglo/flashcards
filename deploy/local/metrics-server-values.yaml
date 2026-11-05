@@ -1,0 +1,9 @@
+# metrics-server for the LOCAL kind cluster. It collects CPU and memory per pod, which
+# "kubectl top" and the api's HorizontalPodAutoscaler read. Cloud clusters ship with it
+# (k3s, EKS add-on); kind doesn't.
+# Install (Step 9 of the Phase 6 guide):
+#   helm install metrics-server metrics-server/metrics-server --version 3.14.0 \
+#     -n kube-system -f deploy/local/metrics-server-values.yaml
+args:
+  # kind's kubelets use self-signed certificates. Local only: never set this in a real cluster.
+  - --kubelet-insecure-tls
