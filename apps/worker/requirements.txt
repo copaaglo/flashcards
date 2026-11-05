@@ -5,3 +5,4 @@ psycopg[binary]==3.3.6
 redis==8.1.0
 rq==2.12.0
 boto3==1.43.112
+prometheus-client==0.26.0

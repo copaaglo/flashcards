@@ -1,0 +1,3 @@
+# The evals import the worker's code, so they need the worker's packages
+-r ../apps/worker/requirements.txt
+pytest==9.1.1

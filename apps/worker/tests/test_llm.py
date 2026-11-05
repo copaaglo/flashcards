@@ -1,6 +1,7 @@
 from types import SimpleNamespace
 
 import pytest
+from prometheus_client import REGISTRY
 
 from worker import llm
 from worker.llm import Card, StudySet
@@ -18,6 +19,9 @@ class FakeAnthropic:
     def parse(self, **kwargs):
         FakeAnthropic.requests.append(kwargs)
         return FakeAnthropic.response
+
+
+USAGE = SimpleNamespace(input_tokens=10_000, output_tokens=2_000)
 
 
 @pytest.fixture
@@ -38,7 +42,9 @@ def test_fake_mode_returns_three_cards(monkeypatch):
 
 def test_sends_lecture_and_prompt_to_model(fake_client):
     expected = StudySet(summary="S", cards=[Card(question="Q?", answer="A")])
-    fake_client.response = SimpleNamespace(stop_reason="end_turn", parsed_output=expected)
+    fake_client.response = SimpleNamespace(
+        stop_reason="end_turn", parsed_output=expected, usage=USAGE
+    )
 
     result = llm.generate_study_set("Pascal's law")
 
@@ -50,7 +56,7 @@ def test_sends_lecture_and_prompt_to_model(fake_client):
 
 
 def test_refusal_raises(fake_client):
-    fake_client.response = SimpleNamespace(stop_reason="refusal", parsed_output=None)
+    fake_client.response = SimpleNamespace(stop_reason="refusal", parsed_output=None, usage=USAGE)
     with pytest.raises(RuntimeError, match="declined"):
         llm.generate_study_set("some text")
 
@@ -63,3 +69,27 @@ def test_too_long_lecture_fails_before_calling_model(fake_client):
 
 def test_prompt_file_is_loaded():
     assert "flashcards" in llm.PROMPT.lower()
+
+
+def metric(name, **labels):
+    return REGISTRY.get_sample_value(name, labels) or 0.0
+
+
+def test_counts_tokens_and_cost(fake_client):
+    expected = StudySet(summary="S", cards=[])
+    fake_client.response = SimpleNamespace(
+        stop_reason="end_turn", parsed_output=expected, usage=USAGE
+    )
+    model = llm.MODEL
+    tokens_before = metric("flashcards_llm_tokens_total", model=model, direction="output")
+    cost_before = metric("flashcards_llm_cost_dollars_total", model=model)
+
+    llm.generate_study_set("Pascal's law")
+
+    assert metric("flashcards_llm_tokens_total", model=model, direction="output") == (
+        tokens_before + 2_000
+    )
+    # 10k input at $4/M + 2k output at $20/M = $0.04 + $0.04
+    assert metric("flashcards_llm_cost_dollars_total", model=model) == pytest.approx(
+        cost_before + 0.08
+    )

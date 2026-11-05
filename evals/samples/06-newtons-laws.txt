@@ -1,0 +1,9 @@
+Physics I, Lecture 4: Newton's Laws of Motion
+
+Newton's first law, the law of inertia, says an object stays at rest or keeps moving in a straight line at constant speed unless a net external force acts on it. Inertia is the tendency of an object to resist changes to its motion, and mass is the measure of inertia.
+
+Newton's second law says the net force on an object equals its mass times its acceleration: F = m a. Force is measured in newtons, where one newton is the force that gives a one kilogram mass an acceleration of one metre per second squared. Force and acceleration are vectors and point in the same direction.
+
+Newton's third law says that for every action there is an equal and opposite reaction. If object A pushes on object B, B pushes back on A with a force of the same size in the opposite direction. The two forces act on different objects, so they never cancel each other.
+
+Weight is the force of gravity on an object: W = m g, where g is about 9.8 metres per second squared near Earth's surface. Mass does not change from place to place, but weight does. The normal force is the push of a surface on an object, perpendicular to the surface. Friction opposes sliding and is roughly the coefficient of friction times the normal force.

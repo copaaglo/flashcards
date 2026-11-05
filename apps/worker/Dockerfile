@@ -10,5 +10,8 @@ COPY worker/ worker/
 RUN useradd --create-home appuser
 USER appuser
 
-# Listen on the "jobs" queue. sh -c lets us read REDIS_URL from the environment.
-CMD ["sh", "-c", "exec rq worker jobs --url \"$REDIS_URL\""]
+# Prometheus scrapes the worker's metrics here
+EXPOSE 9100
+
+# worker/main.py serves /metrics, then listens on the "jobs" queue
+CMD ["python", "-m", "worker.main"]

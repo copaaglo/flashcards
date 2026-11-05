@@ -1,0 +1,57 @@
+# Grafana Alloy: reads every pod's logs through the Kubernetes API and ships them to Loki.
+# (Alloy replaces Promtail, which Grafana has deprecated.)
+# Install (Step 10 of the Phase 6 guide):
+#   helm install alloy grafana/alloy --version 1.15.0 -n monitoring -f deploy/local/monitoring/alloy-values.yaml
+
+controller:
+  # One pod is enough: it reads logs through the API server, not from the node's disk.
+  # More than one would ship every line twice (unless you turn on Alloy clustering).
+  type: deployment
+  replicas: 1
+
+alloy:
+  resources:
+    requests:
+      cpu: 20m
+      memory: 64Mi
+    limits:
+      memory: 256Mi
+  configMap:
+    content: |
+      // Find every pod in the cluster
+      discovery.kubernetes "pods" {
+        role = "pod"
+      }
+
+      // Turn Kubernetes metadata into Loki labels you can filter on in Grafana
+      discovery.relabel "pods" {
+        targets = discovery.kubernetes.pods.targets
+        rule {
+          source_labels = ["__meta_kubernetes_namespace"]
+          target_label  = "namespace"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_name"]
+          target_label  = "pod"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_container_name"]
+          target_label  = "container"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_component"]
+          target_label  = "component"
+        }
+      }
+
+      // Tail each container's logs through the Kubernetes API
+      loki.source.kubernetes "pods" {
+        targets    = discovery.relabel.pods.output
+        forward_to = [loki.write.default.receiver]
+      }
+
+      loki.write "default" {
+        endpoint {
+          url = "http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push"
+        }
+      }

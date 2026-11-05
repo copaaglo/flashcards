@@ -1,0 +1,81 @@
+{{- if .Values.monitoring.enabled }}
+# Tells Prometheus (through the Prometheus Operator) which pods to scrape.
+# PodMonitor instead of ServiceMonitor because the worker has no Service.
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: api
+  labels:
+    {{- include "flashcards.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "flashcards.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: api
+  podMetricsEndpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: worker
+  labels:
+    {{- include "flashcards.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "flashcards.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: worker
+  podMetricsEndpoints:
+    - port: metrics
+      path: /metrics
+      interval: 15s
+---
+# Alert rules. Prometheus evaluates them; firing alerts go to Alertmanager.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: flashcards
+  labels:
+    {{- include "flashcards.labels" . | nindent 4 }}
+spec:
+  groups:
+    - name: flashcards
+      rules:
+        - alert: FlashcardsJobFailureRateHigh
+          # Failed jobs as a share of all finished jobs, over the last 15 minutes
+          expr: |
+            sum by (namespace) (increase(flashcards_jobs_total{status="failed"}[15m]))
+              /
+            sum by (namespace) (increase(flashcards_jobs_total[15m]))
+              > 0.05
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "More than 5% of flashcard jobs are failing in {{`{{ $labels.namespace }}`}}"
+            description: "{{`{{ $value | humanizePercentage }}`}} of jobs failed in the last 15 minutes. Check the worker logs in Grafana."
+        - alert: FlashcardsQueueBackedUp
+          # The job at the front of the line has waited 10+ minutes for a worker
+          expr: max by (namespace) (flashcards_queue_oldest_job_age_seconds) > 600
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Flashcard jobs have been waiting over 10 minutes in {{`{{ $labels.namespace }}`}}"
+            description: "Oldest job has waited {{`{{ $value | humanizeDuration }}`}}. Are workers running? Check KEDA and the worker pods."
+---
+# The Grafana dashboard. Grafana's sidecar loads any ConfigMap with this label.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: flashcards-dashboard
+  labels:
+    {{- include "flashcards.labels" . | nindent 4 }}
+    grafana_dashboard: "1"
+data:
+  flashcards.json: |-
+    {{- .Files.Get "files/dashboard.json" | nindent 4 }}
+{{- end }}

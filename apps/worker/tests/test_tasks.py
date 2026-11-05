@@ -2,6 +2,7 @@ import io
 from unittest.mock import MagicMock
 
 import pytest
+from prometheus_client import REGISTRY
 
 from tests.pdfs import CORRUPTED, image_only_pdf, text_pdf
 from worker import tasks
@@ -138,3 +139,22 @@ def test_process_job_llm_error_fails_cleanly(monkeypatch, conn):
 
     assert conn.statuses[-1] == ("failed", "401 authentication_error")
     assert conn.cards == []
+
+
+def jobs_counted(status):
+    return REGISTRY.get_sample_value("flashcards_jobs_total", {"status": status})
+
+
+def test_process_job_counts_done_and_failed(monkeypatch, conn):
+    done_before, failed_before = jobs_counted("done"), jobs_counted("failed")
+
+    stored_pdf(monkeypatch, text_pdf(["Lecture 3: TCP vs UDP"]))
+    fake_llm(monkeypatch, StudySet(summary="S", cards=[Card(question="Q?", answer="A")]))
+    tasks.process_job(JOB_ID)
+
+    stored_pdf(monkeypatch, image_only_pdf())
+    with pytest.raises(ValueError):
+        tasks.process_job(JOB_ID)
+
+    assert jobs_counted("done") == done_before + 1
+    assert jobs_counted("failed") == failed_before + 1

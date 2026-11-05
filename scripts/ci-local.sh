@@ -18,6 +18,10 @@ for app in api worker; do
   py "apps/$app" "pytest -q -p no:cacheprovider"
 done
 
+echo "== pytest (evals scoring)"
+docker run --rm -v "$PWD":/repo -w /repo/evals -e PIP_DISABLE_PIP_VERSION_CHECK=1 python:3.12-slim \
+  sh -c "pip install -q --root-user-action=ignore -r requirements.txt && pytest -q -p no:cacheprovider"
+
 echo "== eslint"
 (cd apps/web && npm run lint)
 

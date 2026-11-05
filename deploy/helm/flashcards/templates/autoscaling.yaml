@@ -1,0 +1,55 @@
+{{- if .Values.autoscaling.api.enabled }}
+# API: add pods when average CPU goes above the target. Plain Kubernetes, reads metrics-server.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: api
+  labels:
+    {{- include "flashcards.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: api
+  minReplicas: {{ .Values.autoscaling.api.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.api.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.api.targetCPUUtilizationPercentage }}
+{{- end }}
+{{- if .Values.autoscaling.worker.enabled }}
+---
+# Worker: scale on the queue, not on CPU. A worker waiting on the LLM uses almost no CPU,
+# so CPU would never say "we're behind". KEDA reads the queue length straight from Redis
+# and creates (and drives) an HPA for the worker Deployment.
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: worker
+  labels:
+    {{- include "flashcards.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+spec:
+  scaleTargetRef:
+    name: worker
+  minReplicaCount: {{ .Values.autoscaling.worker.minReplicas }}
+  maxReplicaCount: {{ .Values.autoscaling.worker.maxReplicas }}
+  # How often KEDA checks the queue, in seconds
+  pollingInterval: 5
+  cooldownPeriod: {{ .Values.autoscaling.worker.cooldownSeconds }}
+  triggers:
+    - type: redis
+      metadata:
+        # KEDA runs in its own namespace, so it needs the full service name
+        address: redis.{{ .Release.Namespace }}.svc.cluster.local:6379
+        # RQ keeps waiting job IDs in a Redis list with this name
+        listName: rq:queue:jobs
+        listLength: {{ .Values.autoscaling.worker.jobsPerWorker | quote }}
+        # Wake up from zero as soon as one job is waiting
+        activationListLength: "0"
+{{- end }}

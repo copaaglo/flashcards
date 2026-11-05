@@ -1,0 +1,64 @@
+# kube-prometheus-stack on the LOCAL kind cluster: Prometheus, Alertmanager, Grafana,
+# kube-state-metrics, node-exporter and the Prometheus Operator, sized for a laptop.
+# Install (Step 9 of the Phase 6 guide):
+#   helm install monitoring prometheus-community/kube-prometheus-stack --version 92.17.0 \
+#     -n monitoring --create-namespace -f deploy/local/monitoring/kube-prometheus-stack-values.yaml
+
+prometheus:
+  prometheusSpec:
+    # By default the operator only picks up PodMonitors, ServiceMonitors and rules that carry
+    # this Helm release's label. false = pick up every one in the cluster, like our chart's.
+    podMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    # Laptop settings: two days of data, small disk use
+    retention: 2d
+    retentionSize: 2GB
+    scrapeInterval: 15s
+    resources:
+      requests:
+        cpu: 100m
+        memory: 400Mi
+      limits:
+        memory: 1Gi
+
+alertmanager:
+  alertmanagerSpec:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        memory: 128Mi
+
+grafana:
+  # The chart generates a random admin password and keeps it in a Secret (Step 9 shows how to read it)
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 384Mi
+  # Loki (installed next) as a second data source, so logs and metrics sit side by side
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      uid: loki
+      url: http://loki.monitoring.svc.cluster.local:3100
+      access: proxy
+
+# kind runs these control plane parts in a way Prometheus can't scrape. Turning them off
+# avoids four permanently red targets.
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeEtcd:
+  enabled: false
+kubeProxy:
+  enabled: false
+# node-exporter reports the machine's CPU, memory and disk. On kind the "machine" is a
+# container inside Docker Desktop's VM, so the numbers aren't very meaningful, and on a
+# laptop the memory is better spent elsewhere. Keep it on in any real cluster.
+nodeExporter:
+  enabled: false

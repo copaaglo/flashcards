@@ -1,0 +1,19 @@
+Introduction to Psychology, Lecture 9: Heuristics and Cognitive Biases
+
+Heuristics are mental shortcuts that let us make fast judgments with little effort. They usually work, but they also produce systematic errors called cognitive biases. Daniel Kahneman described two modes of thinking: System 1 is fast, automatic and intuitive, while System 2 is slow, effortful and deliberate. Most biases come from relying on System 1 when System 2 is needed.
+
+The availability heuristic is judging how likely something is by how easily examples come to mind. Plane crashes get heavy news coverage, so people overestimate the risk of flying compared with driving.
+
+The representativeness heuristic is judging probability by similarity to a stereotype, while ignoring base rates. If a quiet person who loves books is described, many people guess librarian rather than salesperson, even though salespeople vastly outnumber librarians.
+
+Anchoring is relying too heavily on the first number we see. In experiments, people who first spun a wheel that landed on a high number then gave higher estimates of unrelated quantities.
+
+Confirmation bias is the tendency to seek, notice and remember information that supports what we already believe, and to ignore information that contradicts it.
+
+The framing effect means the same choice is judged differently depending on how it is described. A surgery with a 90 percent survival rate is chosen more often than one with a 10 percent mortality rate, even though they are the same.
+
+Loss aversion is the finding that losses feel roughly twice as strong as equivalent gains. It is a central idea of prospect theory.
+
+Hindsight bias is the feeling, after an event, that we knew it would happen all along.
+
+Ways to reduce bias include slowing down for important decisions, considering the opposite of what you believe, using base rates and checklists, and asking others to challenge your reasoning.

@@ -6,7 +6,10 @@ metadata:
     {{- include "flashcards.labels" . | nindent 4 }}
     app.kubernetes.io/component: worker
 spec:
+  {{- /* With KEDA, the ScaledObject owns the replica count (including zero) */}}
+  {{- if not .Values.autoscaling.worker.enabled }}
   replicas: {{ .Values.worker.replicas }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "flashcards.selectorLabels" . | nindent 6 }}
@@ -25,6 +28,9 @@ spec:
         - name: worker
           image: {{ include "flashcards.image" (list . "worker") }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: metrics
+              containerPort: 9100
           envFrom:
             - configMapRef:
                 name: flashcards-config
