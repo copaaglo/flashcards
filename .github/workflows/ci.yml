@@ -190,6 +190,18 @@ jobs:
           path: evals/results/latest.json
           if-no-files-found: ignore
 
+  # The README and docs/ only point at files that exist, and no TODO(you) is left.
+  # Standard library Python only, so there's nothing to install.
+  docs:
+    name: Docs check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: python scripts/check-docs.py
+
   # Optional deeper analysis. Not in ci-passed, so a SonarCloud outage can't block merges
   sonarcloud:
     name: SonarCloud
@@ -207,7 +219,7 @@ jobs:
     name: CI passed
     if: always()
     # A skipped job (evals on a PR that didn't touch the worker) is fine, a failed one is not
-    needs: [lint-python, lint-web, lint-helm, lint-terraform, test, build-and-scan, evals]
+    needs: [lint-python, lint-web, lint-helm, lint-terraform, test, build-and-scan, evals, docs]
     runs-on: ubuntu-latest
     steps:
       - name: Fail if any job failed or was cancelled

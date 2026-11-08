@@ -22,6 +22,9 @@ echo "== pytest (evals scoring)"
 docker run --rm -v "$PWD":/repo -w /repo/evals -e PIP_DISABLE_PIP_VERSION_CHECK=1 python:3.12-slim \
   sh -c "pip install -q --root-user-action=ignore -r requirements.txt && pytest -q -p no:cacheprovider"
 
+echo "== docs check"
+docker run --rm -v "$PWD":/repo -w /repo python:3.12-slim python scripts/check-docs.py
+
 echo "== eslint"
 (cd apps/web && npm run lint)
 
