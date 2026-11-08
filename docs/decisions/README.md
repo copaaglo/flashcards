@@ -9,5 +9,6 @@ Architecture Decision Records (ADRs): one short file per decision, written when 
 | [0003](0003-build-once-promote-the-same-image.md) | Build once, promote the same image | Accepted |
 | [0004](0004-async-jobs-scaled-on-the-queue.md) | Async jobs, workers scaled on the queue | Accepted |
 | [0005](0005-ai-evals-as-a-merge-gate.md) | AI evals as a merge gate | Accepted |
+| [0006](0006-design-tokens-enforced-by-tailwind.md) | Design tokens enforced by Tailwind | Accepted |
 
 New one: copy the newest file, bump the number, keep it under a page.

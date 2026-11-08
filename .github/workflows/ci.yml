@@ -30,7 +30,7 @@ jobs:
       - run: ruff format --check .
 
   lint-web:
-    name: Lint (eslint)
+    name: Lint + test (web)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -44,6 +44,7 @@ jobs:
           cache-dependency-path: apps/web/package-lock.json
       - run: npm ci
       - run: npm run lint
+      - run: npm test
 
   lint-helm:
     name: Lint (helm)

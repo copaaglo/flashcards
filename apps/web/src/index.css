@@ -1,0 +1,118 @@
+/* Fonts are self-hosted from npm packages: no Google Fonts call at runtime */
+@import "@fontsource-variable/bricolage-grotesque";
+@import "@fontsource-variable/dm-sans";
+@import "tailwindcss";
+
+/*
+  Design tokens. Tailwind generates utilities from these (bg-paper, text-ink, rounded-card...).
+  The "initial" lines delete Tailwind's default palette, sizes and radii, so only our
+  tokens exist. A random color like bg-teal-400 simply won't compile. That is the point.
+*/
+@theme {
+  --color-*: initial;
+  --color-white: #ffffff;
+  --color-paper: #fcfbf8;
+  --color-sunken: #f3f0e8;
+  --color-line: #e8e5de;
+  --color-ink-2: #5c5a55;
+  --color-ink: #1a1a1a;
+
+  /* Deck themes: every deck gets one. Ink text on the first four, white on cobalt */
+  --color-tangerine: #ff7a45;
+  --color-lilac: #c9b8ff;
+  --color-mint: #9fe3c1;
+  --color-lemon: #ffe066;
+  --color-cobalt: #2b4bff;
+
+  /* Meaning */
+  --color-right: #9fe3c1;
+  --color-wrong: #ffd6cc;
+  --color-danger: #b42318;
+  --color-danger-soft: #fee4e2;
+
+  --font-*: initial;
+  --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "DM Sans Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --text-*: initial;
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.125rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.75rem;
+  --text-title: 1.375rem;
+  --text-title--line-height: 1.75rem;
+  --text-h2: 2rem;
+  --text-h2--line-height: 2.25rem;
+  --text-h1: 2.5rem;
+  --text-h1--line-height: 2.75rem;
+  --text-display: 4rem;
+  --text-display--line-height: 1;
+  --text-score: 9rem;
+  --text-score--line-height: 0.9;
+
+  --radius-*: initial;
+  --radius-control: 12px;
+  --radius-tile: 16px;
+  --radius-card: 24px;
+
+  --shadow-*: initial;
+  --shadow-overlay: 0 16px 48px rgb(26 26 26 / 0.18);
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+  body {
+    @apply bg-paper font-sans text-base text-ink antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+    text-wrap: balance;
+  }
+  :focus-visible {
+    outline: 2.5px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+  button:not(:disabled),
+  [role="button"],
+  label[for] {
+    cursor: pointer;
+  }
+  dialog::backdrop {
+    background: rgb(26 26 26 / 0.4);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Indeterminate progress bar for decks that are still generating */
+@keyframes slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+@utility animate-slide {
+  animation: slide 1.4s ease-in-out infinite;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

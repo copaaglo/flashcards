@@ -26,7 +26,7 @@ const short = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric
 
 export function weekLabel(weekStart) {
   const end = addDays(weekStart, 6);
-  return `${short.format(weekStart)} – ${short.format(end)}, ${end.getFullYear()}`;
+  return `${short.format(weekStart)} to ${short.format(end)}`;
 }
 
 export function formatMinutes(total) {
@@ -39,3 +39,23 @@ export function formatMinutes(total) {
 // Tests don't count toward study time
 export const studyMinutes = (list = []) =>
   list.filter((s) => !s.isTest).reduce((sum, s) => sum + s.minutes, 0);
+
+export function parseKey(key) {
+  const [y, m, d] = key.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
+// Whole days from one date key to another (negative if `to` is earlier)
+export function daysBetween(fromKey, toKey) {
+  return Math.round((parseKey(toKey) - parseKey(fromKey)) / 86_400_000);
+}
+
+// The next test (today or later) in the planner, or null
+export function nextTest(sessions, todayKey) {
+  const keys = Object.keys(sessions).filter((k) => k >= todayKey).sort();
+  for (const key of keys) {
+    const test = sessions[key].find((s) => s.isTest);
+    if (test) return { key, title: test.title, days: daysBetween(todayKey, key) };
+  }
+  return null;
+}

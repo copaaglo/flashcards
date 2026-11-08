@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
+import { nextTheme } from "./themes.js";
 import { useStoredState } from "./useStoredState.js";
 
 const PENDING = new Set(["queued", "processing"]);
+const MAX_BYTES = 20 * 1024 * 1024; // same limit the API enforces
+
+export const isPending = (deck) => PENDING.has(deck.status);
 
 // A deck is one uploaded PDF (one API job) and the cards generated from it.
 export function useDecks() {
@@ -39,6 +43,16 @@ export function useDecks() {
 
   async function upload(file) {
     setUploadError(null);
+    // Check what we can before uploading, so the user gets the answer instantly
+    if (file.type !== "application/pdf" && !/\.pdf$/i.test(file.name)) {
+      setUploadError({ title: "That isn't a PDF", detail: `${file.name} isn't a PDF. Export your notes or slides as a PDF and try again.` });
+      return false;
+    }
+    if (file.size > MAX_BYTES) {
+      const mb = Math.round(file.size / 1024 / 1024);
+      setUploadError({ title: "That file is too big", detail: `${file.name} is ${mb} MB. The limit is 20 MB, so try exporting it without images.` });
+      return false;
+    }
     setUploading(true);
     try {
       const form = new FormData();
@@ -51,19 +65,34 @@ export function useDecks() {
       const { job_id, status } = await res.json();
       const name = file.name.replace(/\.pdf$/i, "");
       setDecks((all) => [
-        { id: job_id, name, status, summary: null, error: null, cards: [], createdAt: Date.now() },
+        { id: job_id, name, status, summary: null, error: null, cards: [], createdAt: Date.now(), theme: nextTheme(all) },
         ...all,
       ]);
+      return true;
     } catch (err) {
-      setUploadError(err.message);
+      const offline = err instanceof TypeError; // fetch throws TypeError when the network is down
+      setUploadError({
+        title: offline ? "Can't reach the server" : "Upload failed",
+        detail: offline ? "Check your connection and try again." : err.message,
+      });
+      return false;
     } finally {
       setUploading(false);
     }
   }
 
+  // Returns what restoreDeck needs to undo the removal
   function removeDeck(id) {
+    const index = decks.findIndex((d) => d.id === id);
+    if (index === -1) return null;
+    const deck = decks[index];
     setDecks((all) => all.filter((d) => d.id !== id));
+    return { deck, index };
   }
 
-  return { decks, upload, uploading, uploadError, removeDeck };
+  function restoreDeck({ deck, index }) {
+    setDecks((all) => (all.some((d) => d.id === deck.id) ? all : [...all.slice(0, index), deck, ...all.slice(index)]));
+  }
+
+  return { decks, upload, uploading, uploadError, clearUploadError: () => setUploadError(null), removeDeck, restoreDeck };
 }
