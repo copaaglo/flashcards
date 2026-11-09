@@ -95,7 +95,7 @@ The Kubernetes setup on kind (Helm, Argo CD, monitoring) is in the build guides 
 
 ```
 apps/
-  web/            React upload + study UI, served by nginx
+  web/            React (Tailwind) upload, quiz and study planner UI, served by nginx
   api/            FastAPI: uploads, jobs, /metrics
   worker/         RQ worker: PDF text, LLM call, cards; prompts in worker/prompts/
 evals/            Sample lectures, scoring, and the eval runner CI uses as a quality gate
