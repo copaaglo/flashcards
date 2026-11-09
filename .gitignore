@@ -8,6 +8,9 @@ fixtures/
 .ruff_cache/
 .DS_Store
 
+# Personal build guides, kept locally and out of the repo (docs/ is the public version)
+guides/
+
 # Terraform: provider downloads, state (contains secrets) and variable files (personal values)
 .terraform/
 *.tfstate

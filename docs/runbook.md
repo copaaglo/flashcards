@@ -22,6 +22,12 @@ Deploy your working copy to kind:
 bash scripts/kind-deploy.sh
 ```
 
+Make the bad-input test files (corrupted, empty, fake and oversized PDFs) for poking at the upload validation by hand. They land in `fixtures/`, which is gitignored because two of them are over 20 MB:
+
+```bash
+python3 scripts/make-fixtures.py
+```
+
 ## Cloud environments
 
 Both are off unless I'm using them. Build one (about 15 minutes, about $0.06/hour while up):
