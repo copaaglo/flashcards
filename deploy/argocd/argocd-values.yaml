@@ -1,5 +1,5 @@
 # Settings for Argo CD, on the local kind cluster and on the cloud clusters.
-# Locally: the helm command in guides/phase4 Step 8. Cloud: deploy/cloud/bootstrap.sh.
+# Installed by the "Argo CD" helm command in deploy/cloud/bootstrap.sh (run the same command against kind locally).
 # Only overrides go here.
 
 configs:

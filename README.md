@@ -88,7 +88,7 @@ Before pushing, run the same lint and tests CI runs (in `python:3.12-slim`, so y
 bash scripts/ci-local.sh
 ```
 
-The Kubernetes setup on kind (Helm, Argo CD, monitoring) is in the build guides in `guides/`, and day-to-day commands are in the [runbook](docs/runbook.md).
+Day-to-day commands, including deploying to the local kind cluster, are in the [runbook](docs/runbook.md).
 
 
 ## Repo map
@@ -109,9 +109,8 @@ infra/terraform/
   global/         Budgets, kill switch, the Anthropic key secrets
   modules/        vpc, cluster, database, bucket
   envs/           staging and prod: the same modules, different values
-scripts/          kind deploy, local CI, evals, SSM tunnel, docs check
+scripts/          kind deploy, local CI, evals, SSM tunnel, docs check, test fixtures
 docs/             Architecture, deploy walkthrough, runbook, security, design decisions
-guides/           Step-by-step build guides, one per phase
 ```
 
 
@@ -125,4 +124,3 @@ guides/           Step-by-step build guides, one per phase
 | [Security and cost](docs/security-and-cost.md) | How secrets and access are handled, what it costs, how to turn it off |
 | [Design decisions](docs/decisions/README.md) | Why k3s and not EKS, why GitOps, and other choices |
 | [Known gaps](docs/known-gaps.md) | What's missing on purpose, and what I'd do next |
-| `guides/` | The build guides, phase by phase |
