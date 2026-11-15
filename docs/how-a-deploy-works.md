@@ -76,8 +76,6 @@ Every PR runs `.github/workflows/ci.yml`. The jobs run in parallel:
 
 One job, **CI passed**, waits for all of them, and it's the only required check on `main`. A skipped job (evals on a PR that didn't touch the worker) counts as fine; a failed or cancelled one doesn't. That way the branch rule never has to change when a job is added or renamed.
 
-SonarCloud runs too, but it isn't part of **CI passed**, so an outage on their side can't block a merge.
-
 ## 2. Merge: build the images once
 
 A merge to `main` that changes anything under `apps/` starts `.github/workflows/release.yml`.

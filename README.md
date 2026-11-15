@@ -13,7 +13,7 @@ The app is small on purpose. The point of this repo is everything around it: the
 |---|---|---|
 | App | React (Vite) + nginx, FastAPI, RQ worker, Claude API | `apps/` |
 | Data | Postgres (jobs, cards), S3 (uploads), Redis (job queue) | RDS + S3 in the cloud, containers locally |
-| CI | GitHub Actions: ruff, eslint, pytest, helm lint, terraform validate, Trivy, AI evals, SonarCloud | `.github/workflows/ci.yml` |
+| CI | GitHub Actions: ruff, eslint, pytest, helm lint, terraform validate, Trivy, AI evals | `.github/workflows/ci.yml` |
 | Images | Docker, multi-arch, pushed to GHCR, tagged with the commit SHA | `.github/workflows/release.yml` |
 | Packaging | One Helm chart, one values file per environment | `deploy/helm/flashcards/` |
 | Deploys | Argo CD, synced from `main` (GitOps) | `deploy/argocd/` |
